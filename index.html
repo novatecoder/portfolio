@@ -158,6 +158,13 @@ details.more summary::-webkit-details-marker { display: none; }
 details.more summary::before { content: "+"; font-weight: 700; }
 details.more[open] summary::before { content: "\2212"; }
 details.more summary:hover { text-decoration: underline; }
+/* pdf 모드 — 접이식 details 태그 대신 항상 펼쳐진 div.pdf-open, summary 대신 .more-label */
+.more.pdf-open { display: block; }
+.more-label {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+  color: var(--accent-ink); display: inline-block;
+}
+.demo-poster { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 12px 0; }
 ul.detail { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
 ul.detail li { position: relative; padding-left: 16px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
 ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); }
@@ -319,6 +326,21 @@ footer {
   .flag.done { color: #7fd6a8; background: #12281d; border-color: #24503a; }
 }
 
+/* ---- print / A4 (pdf 모드 — WeasyPrint 기본 media=print 적용) ---- */
+@page { size: A4; margin: 14mm 14mm 16mm; }
+@media print {
+  body { background: #fff; font-size: 10.5pt; line-height: 1.5; }
+  .wrap { max-width: 100%; padding: 0; }
+  .card:hover, .card { box-shadow: none !important; transform: none !important; }
+  .card, .job, .skrow, .edu .row, .comp .item { break-inside: avoid; page-break-inside: avoid; }
+  a { color: var(--ink); }
+  /* WeasyPrint CSS Grid + 세로가 긴 실제 스크린샷(intrinsic ratio) 조합에서
+     grid_layout 내부 어서션이 깨지는 렌더 버그 회피 — 갤러리만 flex로 대체.
+     웹(스크린)에는 영향 없음(@media print 한정). */
+  .shots { display: flex; flex-wrap: wrap; }
+  .shots img { width: 130px; flex: 0 0 130px; }
+}
+
 </style>
 </head>
 <body>
@@ -333,7 +355,7 @@ footer {
     <nav class="contacts">
       <a class="primary" href="github.com/novatecoder"><span class="k">&#8599;</span> github.com/novatecoder</a>
       <a href="mailto:novatecoder@gmail.com"><span class="k">&#9993;</span> novatecoder@gmail.com</a>
-      <a href="https://www.notion.so/2ba7b808814a8019b4cef2c41d31c207"><span class="k">&#8599;</span> Notion Portfolio</a>
+      <a href="https://app.notion.com/p/2026-3a37b808814a8050a490c1572bab648c"><span class="k">&#8599;</span> Notion Portfolio</a>
       <a href="resume.html"><span class="k">&#9776;</span> 이력서 보기</a>
     </nav>
   </header>
@@ -379,8 +401,10 @@ footer {
         
         
         
+        
         <details class="more demo-more">
           <summary>상세 설명</summary>
+        
           
           <div class="par x">
             
@@ -400,7 +424,11 @@ footer {
           
           
           
+          
+          
+        
         </details>
+        
         
       </article>
       
@@ -440,8 +468,10 @@ footer {
         
         
         
+        
         <details class="more demo-more">
           <summary>데모 및 상세 설명</summary>
+        
           
           <div class="par x">
             
@@ -464,16 +494,20 @@ footer {
           </div>
           
           
+          
           <video class="demo-video" autoplay muted loop playsinline controls preload="none" poster="assets/ticket-router/shots/03-autoreply-citation.png">
             <source src="assets/ticket-router/terminal-demo.mp4" type="video/mp4">
           </video>
+          
           
           
           <div class="shots">
             <img src="assets/ticket-router/shots/02-pipeline-nodes.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/04-handoff-sensitive.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/05-summary.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/06-web-board-ui.png" alt="티켓 라우터 스크린샷" loading="lazy">
           </div>
           
+        
         </details>
+        
         
       </article>
       
@@ -513,8 +547,10 @@ footer {
         
         
         
+        
         <details class="more demo-more">
           <summary>데모 및 상세 설명</summary>
+        
           
           <div class="par x">
             
@@ -541,16 +577,20 @@ footer {
           </div>
           
           
+          
           <video class="demo-video" autoplay muted loop playsinline controls preload="none" poster="assets/sift/shots/03_digest.png">
             <source src="assets/sift/demo.mp4" type="video/mp4">
           </video>
+          
           
           
           <div class="shots">
             <img src="assets/sift/shots/01_inbox_flood.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/04_detail_important.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/05_detail_fraud.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/06_home_final.png" alt="sift 스크린샷" loading="lazy">
           </div>
           
+        
         </details>
+        
         
       </article>
       
@@ -573,7 +613,7 @@ footer {
           
           <div class="par-row">
             <span class="par-lab a">접근</span>
-            <span class="par-val">Kotlin·Jetpack Compose(Material3)·Room 단일 모듈 MVVM으로 알고리즘 43유형·426문항과 유형별 이론 노트를 담고, 상태 기반 가중 랜덤 샘플러로 간격 반복(SRS)을 구현했습니다</span>
+            <span class="par-val">Kotlin·Room 단일 모듈 MVVM(Material3)으로 알고리즘 43유형·426문항과 유형별 이론 노트를 담고, 상태 기반 가중 랜덤 샘플러로 간격 반복(SRS)을 구현했습니다</span>
           </div>
           
           <div class="par-row">
@@ -585,13 +625,15 @@ footer {
         
         
         <div class="stack">
-          <span>Kotlin</span><span>Jetpack Compose</span><span>Room</span><span>SRS</span>
+          <span>Kotlin</span><span>Room</span><span>SRS</span>
         </div>
+        
         
         
         
         <details class="more demo-more">
           <summary>데모 및 상세 설명</summary>
+        
           
           <div class="par x">
             
@@ -622,16 +664,20 @@ footer {
           </div>
           
           
+          
           <video class="demo-video" autoplay muted loop playsinline controls preload="none" poster="assets/coding-test-prep/shots/03_quiz_question.png">
             <source src="assets/coding-test-prep/demo.mp4" type="video/mp4">
           </video>
+          
           
           
           <div class="shots">
             <img src="assets/coding-test-prep/shots/01_home.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/04_quiz_correct.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/07_catalog.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/10_stats.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy">
           </div>
           
+        
         </details>
+        
         
       </article>
       
@@ -671,8 +717,10 @@ footer {
         
         
         
+        
         <details class="more demo-more">
           <summary>데모 및 상세 설명</summary>
+        
           
           <div class="par x">
             
@@ -703,16 +751,20 @@ footer {
           </div>
           
           
+          
           <video class="demo-video" autoplay muted loop playsinline controls preload="none" poster="assets/persona-agent/shots/01_start.png">
             <source src="assets/persona-agent/browser.mp4" type="video/mp4">
           </video>
+          
           
           
           <div class="shots">
             <img src="assets/persona-agent/shots/03_emotion_down.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/04_emotion_up.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/05_memory.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/06_delegate.png" alt="persona-agent 스크린샷" loading="lazy">
           </div>
           
+        
         </details>
+        
         
       </article>
       
@@ -939,7 +991,7 @@ footer {
         <div class="skrow">
           <div class="cat">벡터·검색</div>
           <div class="chips">
-            <span>Qdrant</span><span>pgvector</span><span>BGE-M3</span>
+            <span>pgvector</span><span>BGE-M3</span>
           </div>
         </div>
         
@@ -953,7 +1005,7 @@ footer {
         <div class="skrow">
           <div class="cat">모바일</div>
           <div class="chips">
-            <span>Kotlin</span><span>Android</span><span>Jetpack Compose</span><span>Room</span>
+            <span>Kotlin</span><span>Android</span><span>Room</span>
           </div>
         </div>
         

@@ -119,7 +119,7 @@ h1 .en {
 .contacts a:hover { border-color: var(--accent); color: var(--accent-ink); text-decoration: none; transform: translateY(-1px); }
 .contacts a .k { color: var(--faint); }
 
-/* ---- pii info line ---- */
+/* ---- pii info line (레거시 — 현재 템플릿은 .pinfo 섹션 사용) ---- */
 .pii-line {
   font-family: var(--mono);
   font-size: 12.5px;
@@ -128,6 +128,26 @@ h1 .en {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+/* ---- 인적사항 섹션 (항목별 한 줄 + 증명사진) ---- */
+.pinfo { display: flex; gap: 24px; align-items: flex-start; }
+.pinfo-fields { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+.pinfo .row { display: flex; gap: 12px; align-items: baseline; }
+.pinfo .lab {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  min-width: 92px;
+  letter-spacing: 0.02em;
+}
+.pinfo .val { font-size: 15px; color: var(--ink-soft); }
+.pinfo-photo img {
+  width: 118px;
+  height: 152px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 /* ---- core competencies ---- */
@@ -149,6 +169,17 @@ h1 .en {
   width: 6px; height: 6px; border-radius: 2px;
   background: var(--accent); transform: rotate(45deg);
 }
+
+/* competency_groups: 대분류 제목 + 하위불릿 구조화 렌더 */
+.comp-groups { display: flex; flex-direction: column; gap: 16px; }
+.cg-title { font-weight: 700; font-size: 15.5px; color: var(--ink); padding-left: 16px; position: relative; }
+.cg-title::before {
+  content: ""; position: absolute; left: 0; top: 7px;
+  width: 6px; height: 6px; border-radius: 2px;
+  background: var(--accent); transform: rotate(45deg);
+}
+.cg-points { list-style: none; margin: 6px 0 0; padding: 0 0 0 16px; display: flex; flex-direction: column; gap: 6px; }
+.cg-points li { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
 
 /* ---- skills ---- */
 .skills { display: flex; flex-direction: column; gap: 13px; }
@@ -314,7 +345,22 @@ footer {
   section { margin-top: 18px; }
   .contacts a { border: 0; padding: 0 10px 0 0; }
   .card:hover, .contacts a:hover, .card { box-shadow: none !important; transform: none !important; }
-  .job, .wb, .card, .skrow, .edu .row, .comp .item, .comp-list li, .essay .blk { break-inside: avoid; page-break-inside: avoid; }
+  /* WeasyPrint paged 컨텍스트 안정화: 세로 스택 flex를 블록 흐름으로 전환한다.
+     WeasyPrint는 flex-direction:column의 페이지 넘김·flex-grow 높이 계산이 약해
+     페이지 경계에서 자식이 겹쳐 찍힌다. gap은 인접 여백으로 대체한다. */
+  .job ul, .wblocks, .ach-list, .par, .card, .skills, .edu, .essay { display: block; }
+  .essay .blk + .blk { margin-top: 22px; }
+  .card p { flex: none; }
+  .job li + li { margin-top: 12px; }
+  .ach + .ach { margin-top: 14px; }
+  .par-row + .par-row { margin-top: 5px; }
+  .edu .row + .row { margin-top: 13px; }
+  /* 인적사항: pinfo-fields는 세로 스택 flex라 위 겹침 회피 규칙과 동일하게 block 전환 */
+  .pinfo-fields { display: block; }
+  .pinfo .row + .row { margin-top: 9px; }
+  /* break-inside: 한 페이지보다 큰 .job에는 걸지 않는다(강제 불가 → 오버랩 유발).
+     실제로 한 페이지에 들어가는 작은 단위(.wb·.ach·.card 등)에만 적용한다. */
+  .wb, .ach, .card, .skrow, .edu .row, .comp .item, .comp-list li, .cg, .essay .blk, .pinfo { break-inside: avoid; page-break-inside: avoid; }
   .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
   a { color: var(--ink); }
 }
@@ -330,10 +376,10 @@ footer {
       <span class="en">복잡한 데이터 특성을 파악해 모델 성능을 극대화하는, AI 분야 10년 차 AI/ML 엔지니어입니다 (석사 연구 포함). 보안 데이터와 같이 특수성이 강한 도메인에서도 최적의 모델을 설계하고 파인튜닝할 수 있는 응용력을 갖췄으며, TB급 대용량 데이터 처리부터 MLOps 파이프라인 구축까지 문제를 AI 기술로 해결하는 End-to-End 엔지니어링에 주력합니다. 최근에는 LLM 에이전트를 실제 서비스에 적용하는 영역으로 넓혔고, 특히 Claude Code를 적극 활용해 개발 하네스와 멀티에이전트로 개발 과정 자체를 자동화하며 여러 개인 프로젝트를 빠르게 구현하고 있습니다.</span>
     </h1>
     <nav class="contacts">
-      <a href="mailto:novatecoder@gmail.com"><span class="k">✉</span> novatecoder@gmail.com</a>
+      <a href="mailto:novatecoder@gmail.com" class="copy-email" data-email="novatecoder@gmail.com" title="클릭하면 메일 주소가 복사됩니다"><span class="k">✉</span> novatecoder@gmail.com<span class="copy-tip" aria-live="polite" style="margin-left:6px;color:var(--accent-ink);font-weight:600;"></span></a>
       <a href="https://github.com/novatecoder"><span class="k">↗</span> github.com/novatecoder</a>
       <a href="https://novatecoder.github.io/portfolio/"><span class="k">↗</span> 웹 포트폴리오</a>
-      <a href="https://www.notion.so/2ba7b808814a8019b4cef2c41d31c207"><span class="k">↗</span> 노션 포트폴리오</a>
+      <a href="https://app.notion.com/p/2026-3a37b808814a8050a490c1572bab648c"><span class="k">↗</span> 노션 포트폴리오</a>
     </nav>
   </header>
   <section>
@@ -359,15 +405,33 @@ footer {
   </section>
   <section>
     <h2 class="sec">핵심 역량</h2>
-    <ul class="comp-list">
-      <li>Agentic 개발 워크플로우: Claude Code·SDD·멀티에이전트(provider/reviewer) 오케스트레이션 기반 개발 자동화</li>
-      <li>LLM 앱 엔지니어링: LangGraph 멀티에이전트·RAG·MCP 설계 (실무 + 개인 프로젝트)</li>
-      <li>LLM 파인튜닝: LoRA·DeepSpeed/Unsloth 기반 분산 학습 최적화 및 도메인 특화</li>
-      <li>MLOps Automation: Airflow/Kubernetes 기반 학습·배포 파이프라인 자동화 (CI/CD)</li>
-      <li>Deep Learning Modeling: TensorFlow/PyTorch 기반 보안 도메인 맞춤형 모델 설계·최적화</li>
-      <li>Big Data Engineering: Spark 기반 TB급 대용량 처리 아키텍처 및 비용 효율화</li>
-      <li>DevOps &amp; Environment: Docker 기반 연구개발 환경 컨테이너화·표준화</li>
-    </ul>
+    <div class="comp-groups">
+      <div class="cg">
+        <div class="cg-title">도메인 특화 LLM 고효율 학습·최적화 역량</div>
+        <ul class="cg-points"><li>DeepSpeed·Unsloth 기반 대규모 모델 파인튜닝 수행</li><li>LoRA·Sequence Parallelism·ZeRO Offloading 적용으로 학습 속도 50% 개선 및 동일 자원 대비 2배 규모 모델 학습 환경 구축</li>
+        </ul>
+      </div>
+      <div class="cg">
+        <div class="cg-title">선례 없는 기술 과제의 서비스화 경험</div>
+        <ul class="cg-points"><li>가설 수립–실험–검증 기반 아키텍처 설계 (빠른 PoC → 확장형 설계 → 현업 적용)</li><li>보안 로그 등 특수 도메인 데이터 기반 커스텀 BERT 모델 설계부터 배포·운영까지 End-to-End 수행</li>
+        </ul>
+      </div>
+      <div class="cg">
+        <div class="cg-title">협업 기반 모델 신뢰성 확보 및 활용도 제고</div>
+        <ul class="cg-points"><li>분석·제품팀과 협업하여 기술적 불확실성 해소</li><li>SNGP 적용을 통한 불확실성 지표 도입으로 모델 신뢰도 및 실무 활용도 향상</li>
+        </ul>
+      </div>
+      <div class="cg">
+        <div class="cg-title">End-to-End MLOps 자동화 및 데이터 신뢰성 확보</div>
+        <ul class="cg-points"><li>Airflow–Kubernetes 기반 학습·배포 파이프라인 구축</li><li>데이터 스키마 최적화로 조회 성능 70% 개선, 인프라 비용 30% 절감</li>
+        </ul>
+      </div>
+      <div class="cg">
+        <div class="cg-title">Agentic AI·LLM 애플리케이션 최신 기술의 빠른 실무 적용 역량</div>
+        <ul class="cg-points"><li>LangGraph·RAG·MCP·vLLM 기반 AI Agent를 실제 동작 프로토타입·서비스로 구현·검증 (서비스데스크 문의 자동 분류·RAG 자동응답 PoC → 사내 적용)</li><li>Claude Code 기반 개발 하네스 설계로 개발 과정 자체를 자동화(SDD·멀티에이전트 위임), 다수 개인 프로젝트 선구현</li>
+        </ul>
+      </div>
+    </div>
   </section>
   <section>
     <h2 class="sec">기술 스택</h2>
@@ -432,13 +496,11 @@ footer {
           <span>EXAONE</span>
           <span>Kotlin</span>
           <span>Android</span>
-          <span>Jetpack Compose</span>
         </div>
       </div>
       <div class="skrow">
         <div class="cat">데이터·클라우드</div>
         <div class="chips">
-          <span>Qdrant</span>
           <span>pgvector</span>
           <span>BGE-M3</span>
           <span>FastAPI</span>
@@ -713,7 +775,6 @@ footer {
         <p>알고리즘 43유형·426문항을 7종 퀴즈와 간격 반복(SRS)으로 자투리 시간에 복습하는 오프라인 Android 앱으로, 단위 테스트 198건을 갖춰 앱스토어 출시를 준비 중입니다 (비공개)</p>
         <div class="stack">
           <span>Kotlin</span>
-          <span>Jetpack Compose</span>
           <span>Room</span>
           <span>SRS</span>
         </div>
@@ -759,6 +820,31 @@ footer {
       </ul>
     </div>
   </section>
+  <section>
+    <h2 class="sec">자기소개서</h2>
+    <div class="essay">
+      <div class="blk">
+        <div class="h">지향점 및 포부 — 아이디어를 &#39;동작하는 서비스&#39;로 구현하는 실전형 AI 엔지니어</div>
+        <p>AI로 실생활과 산업 현장의 불편을 해소하는 데 흥미를 느껴 이 길을 걸어왔습니다. 지난 7년간 보안이라는 특수 도메인에서 &#39;이론&#39;을 &#39;현장의 가치&#39;로 전환하는 엔지니어링의 본질을 체감했고, 최근에는 생성형 AI·에이전트 기술을 실무에 적용하는 영역으로 역량을 넓혀왔습니다. 앞으로도 최신 AI 기술을 PoC로 빠르게 검증하고 확장형 시스템으로 안착시켜, 사용자가 체감할 수 있는 실질적 가치를 만드는 엔지니어가 되고자 합니다.</p>
+      </div>
+      <div class="blk">
+        <div class="h">직무 역량 — 모델 최적화부터 MLOps, 최신 에이전트까지 검증된 스택</div>
+        <p>안랩 7년 2개월간 AI 엔지니어링 전 과정을 End-to-End로 수행했습니다. Spark 기반 TB급 빅데이터 처리(조회 성능 70% 개선·인프라 비용 30% 절감), 보안 도메인 LLM 파인튜닝·최적화(LoRA·DeepSpeed·Unsloth, 학습 속도 50% 개선), Airflow·Kubernetes 기반 MLOps 자동화까지 담당했습니다. 이직 후에는 LangGraph 멀티에이전트·RAG·MCP 기반 AI Agent를 직접 구현·검증하고, Claude Code 기반 개발 하네스를 설계해 개발 과정 자체를 자동화하며 다수 개인 프로젝트를 선구현하고 있습니다.</p>
+      </div>
+      <div class="blk">
+        <div class="h">성장 과정 — &#39;데이터를 더 넣을까&#39;에서 &#39;문제를 다시 정의할까&#39;로</div>
+        <p>주니어 시절 보안 관제 모델의 오탐을 &#39;틀린 데이터 재학습&#39;으로만 대응했으나 해결되지 않았습니다. 수석 연구원의 &#39;이 파일이 왜 탐지되면 안 되는지 분석했냐&#39;는 질문을 계기로, 문제를 &#39;모델 성능 개선&#39;이 아닌 &#39;파일 분석 기반 예외 처리(화이트리스트)&#39;로 재정의해 해결했습니다. 이후 &#39;어떻게 구현하지&#39;보다 &#39;왜 해야 하고 근본 원인이 무엇인지&#39;를 먼저 묻는 공학적 사고를 체득했습니다.</p>
+      </div>
+      <div class="blk">
+        <div class="h">업무 방식 및 성격 — 궁즉변(窮則變)의 지혜와 PoC 기반의 기민함</div>
+        <p>&#39;궁즉변 변즉통 통즉구&#39;를 좌우명으로 삼아, 막힌 문제일수록 관점을 바꿔 돌파구를 찾습니다. 신중한 성향을 보완하기 위해 PoC 기반 단계별 일정 관리를 실천합니다 — 빠른 PoC로 타당성을 먼저 검증하고, 확장형으로 설계한 뒤, 기본 요구사항을 충족하고 신기능을 추가합니다. 흥미로운 기술은 TODO로 관리해 본류 작업의 리듬을 잃지 않습니다.</p>
+      </div>
+      <div class="blk">
+        <div class="h">문제 해결 능력 — 선례 없는 난제를 도메인 최적화로 돌파</div>
+        <p>레퍼런스가 전무한 상황에서 보안 로그라는 특수 데이터에 NLP를 접목했습니다. CNN·RNN·LSTM을 밑바닥부터 실험해 BERT 입력 구조 커스터마이징이 최선임을 증명했고, Airflow로 학습 파이프라인을 자동화하며 고객사 저사양 환경을 위해 경량화·양자화로 상용화까지 이끌었습니다. 다만 PoC부터 무작정 시작해 요구사항 변경으로 재작업한 경험에서, &#39;무엇을 만들 것인가&#39;의 초기 설계가 구현력만큼 중요함을 배웠습니다.</p>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <span>김원혁 · AI/ML 엔지니어</span>
@@ -766,5 +852,28 @@ footer {
   </footer>
 
 </div>
+<script>
+/* 메일 링크 클릭 시 주소를 클립보드에 복사(메일 클라이언트 미동작 대비). HTML 전용 — PDF(WeasyPrint)는 무시. */
+(function () {
+  document.querySelectorAll('.copy-email').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      var email = el.getAttribute('data-email') || '';
+      var done = function () {
+        var tip = el.querySelector('.copy-tip');
+        if (tip) { tip.textContent = '복사됨'; setTimeout(function () { tip.textContent = ''; }, 1500); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(done).catch(function () { done(); });
+      } else {
+        var ta = document.createElement('textarea'); ta.value = email;
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (_) {}
+        document.body.removeChild(ta); done();
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>
