@@ -10,25 +10,77 @@
 /* 단일 디자인 소스 — render_portfolio_html이 인라인 <style>로 삽입한다. 외부 CDN/폰트 참조 없음. */
 
 :root {
-  --bg: #ffffff;
-  --surface: #f5f8fc;
-  --surface-2: #eef3fa;
-  --ink: #0e1a2b;
-  --ink-soft: #2b3a4f;
-  --muted: #56657a;
-  --faint: #8a97a8;
-  --border: #e3e9f1;
-  --accent: #1d4ed8;
-  --accent-ink: #15369c;
-  --accent-soft: #eaf1ff;
+  /* 색 — 공용 디자인 토큰 정본 라이트 9종. resume.css·portfolio.css 동일 값. */
+  --bg: #FFFFFF;
+  --surface: #F5F6F7;
+  --border: #E3E6E8;
+  --muted: #6E767C;
+  --ink-soft: #5A6268;
+  --ink: #22262A;
+  --accent: #1A5B8A;
+  --accent-ink: #113D5F;
+  --accent-wash: #EDF3F8;
 
-  --sans: "Pretendard", "Pretendard Variable", "Apple SD Gothic Neo",
-    "Malgun Gothic", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-  --mono: "JetBrains Mono", "SF Mono", "Sarasa Mono K", ui-monospace,
-    "Menlo", "Consolas", monospace;
+  /* 간격 — 4단계만. 사이값(20·26·32 등)은 신규 도입 금지. */
+  --space-section: 48px;
+  --space-block: 24px;
+  --space-element: 12px;
+  --space-inline: 6px;
+
+  /* 서체 — 본문/제목은 Pretendard, 숫자·영문 라벨(한글 없는 자리만)은 IBM Plex Mono.
+     웹 배포본은 아래 @font-face로 로컬 woff2를 상대경로 참조(CDN 0 원칙). */
+  --sans: "Pretendard Variable", "Pretendard", -apple-system,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, "Menlo", "Consolas", monospace;
 
   --maxw: 960px;
   --r: 12px;
+}
+
+/* 웹 배포 자산 — 로컬 woff2 상대경로 참조(CDN 0 원칙).
+   woff2 실물은 03_output/portfolio-site/assets/fonts/ 아래 배치(배포 시 동봉).
+   파일이 없으면 폰트가 로드되지 않고 --sans/--mono의 다음 폴백으로 조용히 넘어간다. */
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("assets/fonts/PretendardVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("assets/fonts/Pretendard-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("assets/fonts/Pretendard-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("assets/fonts/Pretendard-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -36,7 +88,7 @@
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 520px at 50% -200px, var(--accent-soft) 0%, transparent 72%),
+    radial-gradient(1200px 520px at 50% -200px, var(--accent-wash) 0%, transparent 72%),
     var(--bg);
   color: var(--ink);
   font-family: var(--sans);
@@ -44,6 +96,10 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* 한글 어절 단위 줄바꿈(단어 중간 분리 방지). overflow-wrap은 전역 적용 금지 —
+     break-word가 좁은 컨테이너에서 제목·라벨까지 글자 단위로 강제 분해한다
+     (실렌더 회귀 확정). 긴 URL 등 실제로 넘칠 수 있는 selector에만 개별 부여. */
+  word-break: keep-all;
 }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px 96px; }
@@ -52,27 +108,33 @@ a { color: var(--accent-ink); text-decoration: none; }
 a:hover { text-decoration: underline; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
-section { margin-top: 60px; }
+section { margin-top: var(--space-section); }
 h2.sec {
-  font-size: 13px;
-  font-family: var(--mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 24px;
-  display: flex; align-items: center; gap: 12px;
+  /* 섹션 제목 / H2 (섹션 제목 규격): 18px/1.35/700/-0.01em, 본문 서체.
+     한글 라벨이라 mono 금지 — Label A(mono) 대신 --sans를 쓴다. */
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 var(--space-element);
+  display: flex; align-items: center; gap: var(--space-element);
 }
-h2.sec::after { content: ""; height: 1px; flex: 1; background: var(--border); }
+h2.sec::after { content: ""; height: 1px; flex: 1; background: var(--ink); }
 
 /* ---- hero ---- */
 header.hero { padding: 92px 0 4px; }
 .role-tag {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.12em;
+  /* 한글 직함이 들어가는 라벨 — 라벨 B(Pretendard 12/1.4/600/0.02em) */
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--accent-ink);
-  background: var(--accent-soft);
-  border: 1px solid #d4e2ff;
+  background: var(--accent-wash);
+  border: 1px solid var(--border);
   padding: 5px 11px;
   border-radius: 999px;
   display: inline-block;
@@ -83,7 +145,6 @@ h1 {
   letter-spacing: -0.022em;
   font-weight: 800;
   margin: 20px 0 0;
-  text-wrap: balance;
 }
 h1 .en {
   display: block;
@@ -96,7 +157,7 @@ h1 .en {
 .lede {
   font-size: clamp(16.5px, 2.2vw, 19px);
   color: var(--ink-soft);
-  max-width: 66ch;
+  max-width: 620px;
   margin: 24px 0 0;
   line-height: 1.72;
 }
@@ -104,9 +165,12 @@ h1 .en {
 
 .contacts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
 .contacts a {
-  font-family: var(--mono);
+  /* 한글 링크 라벨("이력서 보기" 등)이 섞여 mono 대신 --sans 사용 */
+  font-family: var(--sans);
   font-size: 13px;
   color: var(--ink-soft);
+  /* 이메일·URL 등 공백 없는 긴 문자열이 좁은 필 안에서 넘칠 때만 줄바꿈 허용 */
+  overflow-wrap: anywhere;
   border: 1px solid var(--border);
   background: #fff;
   padding: 9px 14px;
@@ -115,28 +179,31 @@ h1 .en {
   transition: border-color .15s, color .15s, transform .15s;
 }
 .contacts a:hover { border-color: var(--accent); color: var(--accent-ink); text-decoration: none; transform: translateY(-1px); }
-.contacts a .k { color: var(--faint); }
+.contacts a .k { color: var(--muted); }
 .contacts a.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .contacts a.primary .k { color: #cfe0ff; }
 .contacts a.primary:hover { background: var(--accent-ink); color: #fff; }
 
 /* ---- 프로젝트 카드 공통 ---- */
-.grid { display: grid; gap: 18px; }
+/* align-items: start — 기본값 stretch면 같은 행 카드가 서로의 details.more 펼침에 맞춰
+   늘어나고 내부에 빈 공간이 생긴다. start로 각 카드가 자기 콘텐츠 높이만 차지하게 한다. */
+.grid { display: grid; gap: var(--space-block); align-items: start; }
 .feat-grid { grid-template-columns: 1fr 1fr; }
-.past-grid { grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.past-grid { grid-template-columns: 1fr 1fr 1fr; gap: var(--space-block); }
 .card {
   border: 1px solid var(--border); border-radius: var(--r); padding: 22px; background: #fff;
   display: flex; flex-direction: column; position: relative;
   transition: border-color .15s, box-shadow .15s, transform .15s;
 }
-.card:hover { border-color: #c5d6f5; box-shadow: 0 10px 32px -20px rgba(29,78,216,.5); transform: translateY(-2px); }
-.card.feat { background: linear-gradient(180deg, var(--surface) 0%, #fff 62%); border-color: #d4e2ff; }
+.card:hover { border-color: var(--border); box-shadow: 0 10px 32px -20px rgba(29,78,216,.5); transform: translateY(-2px); }
+.card.feat { background: linear-gradient(180deg, var(--surface) 0%, #fff 62%); border-color: var(--border); }
 .card.past { padding: 18px; background: var(--surface); }
 .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .card h3 { margin: 0; font-size: 17.5px; font-weight: 750; letter-spacing: -0.01em; }
 .card.past h3 { font-size: 15.5px; }
 .card .repo-link {
-  font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+  /* "링크 : <repo>" — 앞부분이 한글이라 mono 대신 --sans */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em;
   display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
 }
 .card .repo-link:hover { color: var(--accent-ink); }
@@ -145,12 +212,13 @@ h1 .en {
 .card .lead { margin: 12px 0 16px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.62; flex: 1; }
 .card.past .lead { font-size: 13.5px; margin: 10px 0 14px; }
 .stack { display: flex; flex-wrap: wrap; gap: 6px; }
-.stack span { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--accent-soft); padding: 3px 8px; border-radius: 6px; }
+.stack span { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--accent-wash); padding: 3px 8px; border-radius: 6px; }
 
 /* ---- 대표 카드 펼치기 상세 (순수 HTML details, JS 불필요) ---- */
 details.more { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 12px; }
 details.more summary {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+  /* "데모 및 상세 설명"·"상세 설명" — 한글 라벨 B */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   color: var(--accent-ink); cursor: pointer; list-style: none;
   display: inline-flex; align-items: center; gap: 6px; user-select: none;
 }
@@ -161,7 +229,7 @@ details.more summary:hover { text-decoration: underline; }
 /* pdf 모드 — 접이식 details 태그 대신 항상 펼쳐진 div.pdf-open, summary 대신 .more-label */
 .more.pdf-open { display: block; }
 .more-label {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   color: var(--accent-ink); display: inline-block;
 }
 .demo-poster { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 12px 0; }
@@ -170,20 +238,22 @@ ul.detail li { position: relative; padding-left: 16px; font-size: 13.5px; color:
 ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); }
 
 .soon {
-  margin-top: 16px; align-self: flex-start; font-family: var(--mono); font-size: 11px;
-  letter-spacing: 0.03em; color: var(--muted); background: var(--surface-2);
+  /* "준비 중 — 곧 공개" — 한글 라벨 B */
+  margin-top: var(--space-element); align-self: flex-start; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.02em; color: var(--muted); background: var(--surface);
   border: 1px dashed var(--border); padding: 4px 10px; border-radius: 6px;
 }
 
 /* ---- 대표 카드 펼치기 상세 — 이력서 PAR 라벨 구조 (문제/접근/결과) ---- */
-.par { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+.par { display: flex; flex-direction: column; gap: 7px; margin-top: var(--space-element); }
 .par-row { display: grid; grid-template-columns: 60px 1fr; gap: 10px; align-items: baseline; }
 .par-lab {
-  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.03em;
+  /* 문제/접근/결과 — 한글 라벨이라 mono 금지. 라벨 B(12/600/0.02em)로 교체 */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   padding: 2px 0; text-align: center; border-radius: 5px; white-space: nowrap;
 }
 .par-lab.p { color: #8a5a00; background: #fff4e0; border: 1px solid #f3dcae; }
-.par-lab.a { color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); }
+.par-lab.a { color: var(--muted); background: var(--surface); border: 1px solid var(--border); }
 .par-lab.r { color: #0f6b46; background: #e7f7ef; border: 1px solid #bce6d2; }
 .par-val { font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
 .par-val.res { color: var(--accent-ink); font-weight: 650; }
@@ -196,7 +266,7 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
 .shots img { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }
 
 /* ---- 진행 중 카드 ---- */
-.dev-grid { grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.dev-grid { grid-template-columns: 1fr 1fr 1fr; gap: var(--space-block); }
 .card.dev-card { padding: 18px; background: var(--surface); border-style: dashed; }
 .card.dev-card h3 { font-size: 15.5px; }
 .card.dev-card .lead { font-size: 13px; margin: 9px 0 12px; }
@@ -210,15 +280,16 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
 }
 .tier-lab .tier-en {
   font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft);
-  border: 1px solid #c5d6f5; padding: 2px 8px; border-radius: 6px;
+  text-transform: uppercase; color: var(--accent-ink); background: var(--accent-wash);
+  border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px;
 }
 
 /* ---- 경력 요약 하단 안내 ---- */
 .career-more { margin: 22px 0 0; font-size: 13px; color: var(--muted); }
 
 .flag {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.03em;
+  /* "개발 중"·"설계·PoC"·"체감추정" — 전부 한글 라벨 B */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   color: #8a5a00; background: #fff4e0; border: 1px solid #f3dcae;
   padding: 1px 7px; border-radius: 5px; white-space: nowrap;
 }
@@ -226,9 +297,9 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
 
 /* ---- 진행 중 pills ---- */
 .dev { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.dev .lab { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em; }
+.dev .lab { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
 .dev .pill { font-size: 13px; color: var(--ink-soft); border: 1px dashed var(--border); border-radius: 7px; padding: 6px 13px; background: var(--surface); }
-.dev .pill .repo { font-family: var(--mono); font-size: 10.5px; color: var(--faint); margin-left: 6px; }
+.dev .pill .repo { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-left: 6px; }
 
 /* ---- core competencies ---- */
 .comp { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; }
@@ -248,10 +319,10 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
   padding-bottom: 13px; border-bottom: 1px dashed var(--border);
 }
 .skrow:last-child { border-bottom: 0; padding-bottom: 0; }
-.skrow .cat { font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: 0.02em; padding-top: 3px; }
+.skrow .cat { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; padding-top: 3px; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chips span { font-size: 13px; color: var(--ink-soft); border: 1px solid var(--border); padding: 4px 10px; border-radius: 7px; background: #fff; }
-.chips span.key { border-color: #c5d6f5; color: var(--accent-ink); background: var(--accent-soft); font-weight: 600; }
+.chips span.key { border-color: var(--border); color: var(--accent-ink); background: var(--accent-wash); font-weight: 600; }
 
 /* ---- experience (condensed) ---- */
 .tl { position: relative; padding-left: 26px; }
@@ -259,14 +330,14 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
   content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px;
   width: 2px; background: linear-gradient(var(--border), var(--border) 70%, transparent);
 }
-.job { position: relative; padding-bottom: 30px; }
+.job { position: relative; padding-bottom: var(--space-block); }
 .job:last-child { padding-bottom: 0; }
 .job::before {
   content: ""; position: absolute; left: -24px; top: 7px;
   width: 11px; height: 11px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+  background: var(--accent); box-shadow: 0 0 0 4px var(--accent-wash);
 }
-.job.gap::before { background: var(--faint); box-shadow: 0 0 0 4px var(--surface-2); }
+.job.gap::before { background: var(--muted); box-shadow: 0 0 0 4px var(--surface); }
 .job .when { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); }
 .job h3 { margin: 5px 0 2px; font-size: 18px; font-weight: 750; letter-spacing: -0.01em; }
 .job .meta { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
@@ -284,9 +355,10 @@ ul.detail li::before { content: ""; position: absolute; left: 0; top: 8px; width
 .edu .row .y { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); white-space: nowrap; }
 
 footer {
-  margin-top: 68px; padding-top: 24px; border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
-  color: var(--faint); font-family: var(--mono); font-size: 12px;
+  margin-top: var(--space-section); padding-top: var(--space-block); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-element);
+  /* 이름·직함(한글)이 섞여 mono 대신 --sans */
+  color: var(--muted); font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -303,42 +375,125 @@ footer {
   header.hero { padding: 64px 0 4px; }
 }
 
-/* ---- 다크 모드 (뷰어 선호 색상 반영, 라이트/다크 무난) ---- */
+/* ---- 다크 모드 (웹만, 웹만, PDF는 라이트 고정) ---- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0c1420;
-    --surface: #131e2d;
-    --surface-2: #182536;
-    --ink: #eef3fa;
-    --ink-soft: #c4d0df;
-    --muted: #93a2b6;
-    --faint: #6b7a8f;
-    --border: #223146;
-    --accent: #4f8bff;
-    --accent-ink: #a7c6ff;
-    --accent-soft: #16243c;
+    --bg: #14171A;
+    --surface: #1C2024;
+    --border: #2C3237;
+    --muted: #9AA2A8;
+    --ink-soft: #B6BDC2;
+    --ink: #E7EAEC;
+    --accent: #6FB3E0;
+    --accent-ink: #9CCDEE;
+    --accent-wash: #16293A;
   }
   .contacts a, .chips span, .card { background: var(--surface); }
   .contacts a.primary { background: var(--accent); color: #08111d; border-color: var(--accent); }
   .contacts a.primary:hover { background: var(--accent-ink); color: #08111d; }
-  .card.feat { background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 62%); border-color: #26456f; }
+  .card.feat { background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 62%); border-color: #26456f; }
   .flag { color: #f0c674; background: #2a2410; border-color: #4a3f1a; }
   .flag.done { color: #7fd6a8; background: #12281d; border-color: #24503a; }
 }
 
 /* ---- print / A4 (pdf 모드 — WeasyPrint 기본 media=print 적용) ---- */
-@page { size: A4; margin: 14mm 14mm 16mm; }
+@page {
+  size: A4; margin: 22mm 18mm;
+  /* 페이지 번호 자동 카운터 — 페이지를 빼도 재계산됨 */
+  @bottom-right { content: counter(page) " / " counter(pages); font-family: var(--mono); font-size: 8pt; color: var(--muted); }
+}
 @media print {
-  body { background: #fff; font-size: 10.5pt; line-height: 1.5; }
+  /* 인쇄 사양 정본: 본문 10.5pt/1.6 · 항목 10pt/1.65 · H1 24pt · H2 18pt ·
+     라벨 9pt · 푸터 8pt. */
+  body { background: #fff; font-size: 10.5pt; line-height: 1.6; }
   .wrap { max-width: 100%; padding: 0; }
+  h1 { font-size: 24pt; }
+  h2.sec { font-size: 18pt; }
+  .job li, .card .lead, .par-val, ul.detail li { font-size: 10pt; line-height: 1.65; }
+  .role-tag, .skrow .cat, .par-lab, .flag, .card .repo-link, .soon, .more-label,
+  details.more summary { font-size: 9pt; }
+  footer { font-size: 8pt; }
   .card:hover, .card { box-shadow: none !important; transform: none !important; }
-  .card, .job, .skrow, .edu .row, .comp .item { break-inside: avoid; page-break-inside: avoid; }
   a { color: var(--ink); }
-  /* WeasyPrint CSS Grid + 세로가 긴 실제 스크린샷(intrinsic ratio) 조합에서
-     grid_layout 내부 어서션이 깨지는 렌더 버그 회피 — 갤러리만 flex로 대체.
-     웹(스크린)에는 영향 없음(@media print 한정). */
-  .shots { display: flex; flex-wrap: wrap; }
-  .shots img { width: 130px; flex: 0 0 130px; }
+
+  /* 큰 컨테이너(카드 본문 전체·섹션·그리드)에는 break-inside: avoid를 걸지 않는다 —
+     강제 불가라 통째로 다음 페이지로 밀려 앞 페이지가 백지로 남는다(실렌더 회귀 확정).
+     대신 데모 이미지 블록(.demo-media, 아래 참조)만 작은 단위로 묶어 avoid를 건다 —
+     카드 본문은 계속 자연스럽게 흐르되, 이미지만큼은 카드 배경이 빈 채로 걸치지 않고
+     통째로 다음 페이지로 넘어간다. */
+  .job, .skrow, .edu .row, .comp .item, .par-row, .card.past, .card.dev-card {
+    break-inside: avoid; page-break-inside: avoid;
+  }
+
+  /* 데모 이미지(포스터+스샷) 전용 작은 단위 — 스크린샷 개수·크기를 줄여(아래 참조)
+     충분히 작아졌으므로 이 블록만 쪼개지지 않게 묶어도 낭비가 크지 않다.
+     카드 본문(제목·설명·PAR)은 이 규칙 밖이라 필요하면 계속 자연스럽게 흐른다. */
+  .demo-media { break-inside: avoid; page-break-inside: avoid; }
+
+  /* WeasyPrint paged 컨텍스트 안정화: 세로 스택 flex를 블록 흐름으로 전환한다.
+     WeasyPrint는 flex-direction:column의 페이지 넘김·flex-grow 높이 계산이 약해
+     페이지 경계에서 자식이 겹쳐 찍힌다. gap은 인접 여백으로 대체한다. */
+  /* .card 자체가 flex-column으로 남아 있으면 WeasyPrint가 카드 전체를 쪼갤 수 없는
+     원자 단위로 취급해, 남은 여백에 못 들어가면 카드 통째로 다음 페이지로 밀며
+     현재 페이지에 대량 공백을 남긴다(실렌더 회귀 확정) — block으로 전환해 자연스러운
+     페이지 분할을 허용한다. 자식 간 간격은 이미 각자 margin으로 관리돼 gap 보정 불필요. */
+  .card, .job ul, .par, .skills, .edu, ul.detail { display: block; }
+  .job li + li { margin-top: 8px; }
+  .par-row + .par-row { margin-top: 7px; }
+  .skrow + .skrow { margin-top: 13px; }
+  .edu .row + .row { margin-top: 13px; }
+  ul.detail li + li { margin-top: 9px; }
+  .card p { flex: none; }
+  .card .lead { flex: none; }
+
+  /* 카드 그리드(2·3열)는 페이지 경계를 넘지 못해 카드가 반으로 잘리거나 한쪽 컬럼만
+     다음 페이지로 넘어가 반대쪽이 백지로 남는다(실렌더 회귀 확정) — print은 1열로 전환해
+     세로로 흐르게 한다. 웹 화면(2·3열 균등 그리드)은 이 규칙 밖(@media print 한정). */
+  .grid { display: block; }
+  .grid > .card { margin-bottom: var(--space-block); }
+  .grid > .card:last-child { margin-bottom: 0; }
+
+  /* 카드 제목과 "링크 : <repo>"가 같은 행에서 폭을 다퉈 제목이 여러 줄로 쪼개진다 —
+     print에서는 세로로 쌓아 제목에 전체 폭을 확보한다. */
+  .card .top { display: block; }
+  .card .repo-link { margin-top: 3px; }
+
+  /* 이메일·URL 등 공백 없는 긴 문자열이 좁은 칸에서 글자 단위로 쪼개지는 회귀 방지 —
+     flex item이 min-content로 강제 축소되지 않게 자연 폭을 확보한다.
+     overflow-wrap: anywhere는 실제로 폭을 넘칠 때만 발동(정상 폭에서는 무해). */
+  /* overflow-wrap: anywhere는 min/max-content 계산 자체를 "아무 데서나 끊길 수 있음"으로
+     바꿔 min-width: max-content가 무력화된다(이메일이 여전히 글자 단위로 쪼개짐,
+     실렌더 확정) — 인쇄 폭은 충분하므로 print에서는 normal로 되돌려 정상 폭을 확보한다. */
+  .contacts a { flex: none; min-width: max-content; overflow-wrap: normal; }
+
+  /* 흑백 인쇄 대비 — 배지는 채움 없이 테두리로만 */
+  .flag { background: transparent; border: 1px solid currentColor; }
+  .flag.done { background: transparent; }
+
+  /* 스크린샷 갤러리: WeasyPrint CSS Grid + 세로가 긴 실제 스크린샷(intrinsic ratio)
+     조합에서 grid_layout 내부 어서션이 깨지는 렌더 버그 회피 겸, 실제 스크린샷의
+     제각각인 종횡비가 행 높이를 불균등하게 만들어 대량 공백을 유발하는 문제를
+     16:10 고정 박스(object-fit: cover)로 함께 해소한다. 웹(스크린)에는 영향 없음. */
+  /* height: auto + aspect-ratio 조합은 WeasyPrint의 페이지 분할 높이 추정이 부정확해
+     실제로는 남은 공간에 들어가는 갤러리를 통째로 다음 페이지로 밀어 대량 공백을
+     남긴다(실렌더 회귀 확정) — 고정 px 높이로 명시해 추정 오차를 없앤다. */
+  /* 개수는 portfolio.py _PDF_MAX_SHOTS(2장)로 템플릿 단계에서 이미 제한됨 — 여기서는
+     크기만 축소한다. 스샷이 페이지 폭을 거의 채우는 문제(사용자 피드백)를 줄이기 위해
+     16:10 유지한 채 썸네일을 카드 폭의 일부만 차지하도록 더 작게 잡는다. */
+  .shots { display: flex; flex-wrap: wrap; gap: var(--space-element); }
+  .shots img {
+    width: 96px; height: 60px; object-fit: cover;
+    flex: 0 0 96px; border-radius: 0; box-shadow: none;
+  }
+
+  /* 데모 포스터·GIF·영상 대체 이미지도 같은 정책 — 카드 폭을 거의 채우는 전면 이미지
+     대신 카드 폭의 일부만 차지하게 한다(사용자 피드백: "스크린샷이 너무 크다"). */
+  /* 세로로 긴 실제 스크린샷(모바일 앱 등)은 폭 45%만으로는 세로 길이가 여전히 크다 —
+     최대 높이도 함께 잡아 페이지 세로 공간을 과점하지 않게 한다(비율은 유지, 잘리지
+     않도록 object-fit: contain). */
+  .demo-poster, .demo-gif, .demo-video {
+    max-width: 45%; max-height: 170px; width: auto; height: auto; object-fit: contain;
+  }
 }
 
 </style>
@@ -356,13 +511,14 @@ footer {
       <a class="primary" href="github.com/novatecoder"><span class="k">&#8599;</span> github.com/novatecoder</a>
       <a href="mailto:novatecoder@gmail.com"><span class="k">&#9993;</span> novatecoder@gmail.com</a>
       <a href="https://app.notion.com/p/2026-3a37b808814a8050a490c1572bab648c"><span class="k">&#8599;</span> Notion Portfolio</a>
-      <a href="resume.html"><span class="k">&#9776;</span> 이력서 보기</a>
+      
+      <a href="resume.html"><span class="k">&#9776;</span> <span>이력서 보기</span></a>
     </nav>
   </header>
 
   
   <section>
-    <h2 class="sec">대표 개인 프로젝트</h2>
+    <h2 class="sec"><span>대표 개인 프로젝트</span></h2>
     <div class="grid feat-grid">
       
       <article class="card feat">
@@ -403,7 +559,8 @@ footer {
         
         
         <details class="more demo-more">
-          <summary>상세 설명</summary>
+          
+          <summary><span>상세 설명</span></summary>
         
           
           <div class="par x">
@@ -470,7 +627,8 @@ footer {
         
         
         <details class="more demo-more">
-          <summary>데모 및 상세 설명</summary>
+          
+          <summary><span>데모 및 상세 설명</span></summary>
         
           
           <div class="par x">
@@ -500,10 +658,10 @@ footer {
           </video>
           
           
-          
           <div class="shots">
             <img src="assets/ticket-router/shots/02-pipeline-nodes.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/04-handoff-sensitive.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/05-summary.png" alt="티켓 라우터 스크린샷" loading="lazy"><img src="assets/ticket-router/shots/06-web-board-ui.png" alt="티켓 라우터 스크린샷" loading="lazy">
           </div>
+          
           
         
         </details>
@@ -549,7 +707,8 @@ footer {
         
         
         <details class="more demo-more">
-          <summary>데모 및 상세 설명</summary>
+          
+          <summary><span>데모 및 상세 설명</span></summary>
         
           
           <div class="par x">
@@ -583,10 +742,10 @@ footer {
           </video>
           
           
-          
           <div class="shots">
             <img src="assets/sift/shots/01_inbox_flood.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/04_detail_important.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/05_detail_fraud.png" alt="sift 스크린샷" loading="lazy"><img src="assets/sift/shots/06_home_final.png" alt="sift 스크린샷" loading="lazy">
           </div>
+          
           
         
         </details>
@@ -632,7 +791,8 @@ footer {
         
         
         <details class="more demo-more">
-          <summary>데모 및 상세 설명</summary>
+          
+          <summary><span>데모 및 상세 설명</span></summary>
         
           
           <div class="par x">
@@ -670,10 +830,10 @@ footer {
           </video>
           
           
-          
           <div class="shots">
             <img src="assets/coding-test-prep/shots/01_home.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/04_quiz_correct.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/07_catalog.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy"><img src="assets/coding-test-prep/shots/10_stats.png" alt="코딩테스트 퀴즈 앱 스크린샷" loading="lazy">
           </div>
+          
           
         
         </details>
@@ -719,7 +879,8 @@ footer {
         
         
         <details class="more demo-more">
-          <summary>데모 및 상세 설명</summary>
+          
+          <summary><span>데모 및 상세 설명</span></summary>
         
           
           <div class="par x">
@@ -757,10 +918,10 @@ footer {
           </video>
           
           
-          
           <div class="shots">
             <img src="assets/persona-agent/shots/03_emotion_down.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/04_emotion_up.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/05_memory.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/06_delegate.png" alt="persona-agent 스크린샷" loading="lazy">
           </div>
+          
           
         
         </details>
@@ -774,7 +935,7 @@ footer {
 
   
   <section>
-    <h2 class="sec">그 외 개인 프로젝트</h2>
+    <h2 class="sec"><span>그 외 개인 프로젝트</span></h2>
     <div class="grid past-grid">
       
       <article class="card past">
@@ -873,7 +1034,7 @@ footer {
 
   
   <section>
-    <h2 class="sec">진행 중 개인 프로젝트</h2>
+    <h2 class="sec"><span>진행 중 개인 프로젝트</span></h2>
     <div class="grid dev-grid">
       
       <article class="card dev-card">
@@ -902,7 +1063,7 @@ footer {
 
   
   <section>
-    <h2 class="sec">핵심 역량</h2>
+    <h2 class="sec"><span>핵심 역량</span></h2>
     <div class="comp">
       
       <div class="item"><div class="t">Agentic 개발 워크플로우: Claude Code·SDD·멀티에이전트(provider/reviewer) 오케스트레이션 기반 개발 자동화</div></div>
@@ -925,10 +1086,11 @@ footer {
 
   
   <section>
-    <h2 class="sec">기술 스택</h2>
+    <h2 class="sec"><span>기술 스택</span></h2>
     
     <div class="sk-tier">
-      <div class="tier-lab">성과 보유 핵심 <span class="tier-en">Advanced</span></div>
+      
+      <div class="tier-lab"><span>성과 보유 핵심</span> <span class="tier-en">Advanced</span></div>
       <div class="skills">
         
         <div class="skrow">
@@ -978,7 +1140,7 @@ footer {
     
     
     <div class="sk-tier">
-      <div class="tier-lab">즉시 투입 <span class="tier-en">Apply</span></div>
+      <div class="tier-lab"><span>즉시 투입</span> <span class="tier-en">Apply</span></div>
       <div class="skills">
         
         <div class="skrow">
@@ -1024,7 +1186,7 @@ footer {
 
   
   <section>
-    <h2 class="sec">경력</h2>
+    <h2 class="sec"><span>경력</span></h2>
     <div class="tl">
       
       <div class="job">
@@ -1064,7 +1226,7 @@ footer {
 
   
   <section>
-    <h2 class="sec">학력</h2>
+    <h2 class="sec"><span>학력</span></h2>
     <div class="edu">
       
       <div class="row">
@@ -1075,6 +1237,11 @@ footer {
       <div class="row">
         <div class="d"><b>광운대학교</b> <span>· 학사 로봇학과</span></div>
         <div class="y">2010.03–2017.02</div>
+      </div>
+      
+      <div class="row">
+        <div class="d"><b>강서고등학교</b> <span>· 고등학교</span></div>
+        <div class="y">2007.03–2010.02</div>
       </div>
       
     </div>

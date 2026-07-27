@@ -10,22 +10,27 @@
 /* 단일 디자인 소스 — render_html / render_pdf 모두 이 파일을 참조한다. */
 
 :root {
-  --bg: #ffffff;
-  --surface: #f5f8fc;
-  --surface-2: #eef3fa;
-  --ink: #0e1a2b;
-  --ink-soft: #2b3a4f;
-  --muted: #56657a;
-  --faint: #8a97a8;
-  --border: #e3e9f1;
-  --accent: #1d4ed8;
-  --accent-ink: #15369c;
-  --accent-soft: #eaf1ff;
+  /* 색 — 공용 디자인 토큰 정본 라이트 9종. resume.css·portfolio.css 동일 값. */
+  --bg: #FFFFFF;
+  --surface: #F5F6F7;
+  --border: #E3E6E8;
+  --muted: #6E767C;
+  --ink-soft: #5A6268;
+  --ink: #22262A;
+  --accent: #1A5B8A;
+  --accent-ink: #113D5F;
+  --accent-wash: #EDF3F8;
 
-  --sans: "Noto Sans KR", "Noto Sans CJK KR", "Malgun Gothic",
-    "Apple SD Gothic Neo", system-ui, -apple-system, sans-serif;
-  --mono: "JetBrains Mono", "SF Mono", "Sarasa Mono K", ui-monospace,
-    "Menlo", "Consolas", monospace;
+  /* 간격 — 4단계만. 사이값(20·26·32 등)은 신규 도입 금지. */
+  --space-section: 48px;
+  --space-block: 24px;
+  --space-element: 12px;
+  --space-inline: 6px;
+
+  /* 서체 — 본문/제목은 Pretendard, 숫자·영문 라벨(한글 없는 자리만)은 IBM Plex Mono. */
+  --sans: "Pretendard Variable", "Pretendard", -apple-system,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --mono: "IBM Plex Mono", "SF Mono", ui-monospace, "Menlo", "Consolas", monospace;
 
   --maxw: 880px;
   --r: 12px;
@@ -36,7 +41,7 @@
 body {
   margin: 0;
   background:
-    radial-gradient(1100px 460px at 50% -160px, var(--accent-soft) 0%, transparent 70%),
+    radial-gradient(1100px 460px at 50% -160px, var(--accent-wash) 0%, transparent 70%),
     var(--bg);
   color: var(--ink);
   font-family: var(--sans);
@@ -44,6 +49,10 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* 한글 어절 단위 줄바꿈(단어 중간 분리 방지). overflow-wrap은 전역 적용 금지 —
+     break-word가 좁은 컨테이너에서 제목·라벨까지 글자 단위로 강제 분해한다
+     (실렌더 회귀 확정). 긴 URL 등 실제로 넘칠 수 있는 selector에만 개별 부여. */
+  word-break: keep-all;
 }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px 88px; }
@@ -52,27 +61,33 @@ a { color: var(--accent-ink); text-decoration: none; }
 a:hover { text-decoration: underline; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
-section { margin-top: 52px; }
+section { margin-top: var(--space-section); }
 h2.sec {
-  font-size: 13px;
-  font-family: var(--mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 22px;
-  display: flex; align-items: center; gap: 12px;
+  /* 섹션 제목 / H2 (섹션 제목 규격): 18px/1.35/700/-0.01em, 본문 서체.
+     한글 라벨이라 mono 금지 — Label A(mono) 대신 --sans를 쓴다. */
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 var(--space-element);
+  display: flex; align-items: center; gap: var(--space-element);
 }
-h2.sec::after { content: ""; height: 1px; flex: 1; background: var(--border); }
+h2.sec::after { content: ""; height: 1px; flex: 1; background: var(--ink); }
 
 /* ---- hero ---- */
 header.hero { padding: 80px 0 4px; }
 .role-tag {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.12em;
+  /* 한글 직함이 들어가는 라벨 — 라벨 B(Pretendard 12/1.4/600/0.02em) */
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--accent-ink);
-  background: var(--accent-soft);
-  border: 1px solid #d4e2ff;
+  background: var(--accent-wash);
+  border: 1px solid var(--border);
   padding: 5px 11px;
   border-radius: 999px;
   display: inline-block;
@@ -83,7 +98,6 @@ h1 {
   letter-spacing: -0.02em;
   font-weight: 800;
   margin: 20px 0 0;
-  text-wrap: balance;
 }
 h1 .en {
   display: block;
@@ -92,13 +106,13 @@ h1 .en {
   letter-spacing: 0.01em;
   line-height: 1.72;
   color: var(--ink-soft);
-  max-width: 72ch;
+  max-width: 620px;
   margin-top: 16px;
 }
 .lede {
   font-size: clamp(16.5px, 2.2vw, 18.5px);
   color: var(--ink-soft);
-  max-width: 64ch;
+  max-width: 620px;
   margin: 22px 0 0;
   line-height: 1.7;
 }
@@ -106,9 +120,12 @@ h1 .en {
 
 .contacts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .contacts a {
-  font-family: var(--mono);
+  /* 한글 링크 라벨("웹 포트폴리오" 등)이 섞여 mono 대신 --sans 사용 */
+  font-family: var(--sans);
   font-size: 13px;
   color: var(--ink-soft);
+  /* 이메일·URL 등 공백 없는 긴 문자열이 좁은 필 안에서 넘칠 때만 줄바꿈 허용 */
+  overflow-wrap: anywhere;
   border: 1px solid var(--border);
   background: #fff;
   padding: 9px 14px;
@@ -117,11 +134,11 @@ h1 .en {
   transition: border-color .15s, color .15s, transform .15s;
 }
 .contacts a:hover { border-color: var(--accent); color: var(--accent-ink); text-decoration: none; transform: translateY(-1px); }
-.contacts a .k { color: var(--faint); }
+.contacts a .k { color: var(--muted); }
 
 /* ---- pii info line (레거시 — 현재 템플릿은 .pinfo 섹션 사용) ---- */
 .pii-line {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 12.5px;
   color: var(--muted);
   margin-top: 12px;
@@ -131,12 +148,14 @@ h1 .en {
 }
 
 /* ---- 인적사항 섹션 (항목별 한 줄 + 증명사진) ---- */
-.pinfo { display: flex; gap: 24px; align-items: flex-start; }
+.pinfo { display: flex; gap: var(--space-block); align-items: flex-start; }
 .pinfo-fields { flex: 1; display: flex; flex-direction: column; gap: 9px; }
 .pinfo .row { display: flex; gap: 12px; align-items: baseline; }
 .pinfo .lab {
-  font-family: var(--mono);
-  font-size: 12.5px;
+  /* 인적사항 한글 필드 라벨 — 라벨 B (PII 필드명 리터럴은 CSS 주석에 적지 않는다: 렌더 HTML의 인적사항 제외 검증이 style 태그 안 CSS 텍스트까지 훑는다) */
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
   color: var(--muted);
   min-width: 92px;
   letter-spacing: 0.02em;
@@ -188,10 +207,10 @@ h1 .en {
   padding-bottom: 13px; border-bottom: 1px dashed var(--border);
 }
 .skrow:last-child { border-bottom: 0; padding-bottom: 0; }
-.skrow .cat { font-family: var(--mono); font-size: 12.5px; color: var(--muted); letter-spacing: 0.02em; padding-top: 3px; }
+.skrow .cat { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; padding-top: 3px; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chips span { font-size: 13px; color: var(--ink-soft); border: 1px solid var(--border); padding: 4px 10px; border-radius: 7px; background: #fff; }
-.chips span.key { border-color: #c5d6f5; color: var(--accent-ink); background: var(--accent-soft); font-weight: 600; }
+.chips span.key { border-color: var(--border); color: var(--accent-ink); background: var(--accent-wash); font-weight: 600; }
 
 /* ---- education ---- */
 .edu { display: flex; flex-direction: column; gap: 13px; }
@@ -207,14 +226,14 @@ h1 .en {
   content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px;
   width: 2px; background: linear-gradient(var(--border), var(--border) 70%, transparent);
 }
-.job { position: relative; padding-bottom: 36px; }
+.job { position: relative; padding-bottom: var(--space-block); }
 .job:last-child { padding-bottom: 0; }
 .job::before {
   content: ""; position: absolute; left: -24px; top: 7px;
   width: 11px; height: 11px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+  background: var(--accent); box-shadow: 0 0 0 4px var(--accent-wash);
 }
-.job.gap::before { background: var(--faint); box-shadow: 0 0 0 4px var(--surface-2); }
+.job.gap::before { background: var(--muted); box-shadow: 0 0 0 4px var(--surface); }
 .job .when { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); letter-spacing: 0.01em; }
 .job h3 { margin: 5px 0 2px; font-size: 19px; font-weight: 750; letter-spacing: -0.01em; }
 .job .meta { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
@@ -225,7 +244,8 @@ h1 .en {
 .job li .sub { display: block; color: var(--muted); font-size: 13.5px; margin-top: 3px; }
 
 .flag {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.03em;
+  /* 대괄호 표기(〔체감추정〕 등) 전부 한글 — 라벨 B */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
   color: #8a5a00; background: #fff4e0; border: 1px solid #f3dcae;
   padding: 1px 6px; border-radius: 5px; white-space: nowrap; vertical-align: middle;
 }
@@ -249,8 +269,8 @@ h1 .en {
 .metrics { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
 .metric {
   font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.01em;
-  color: var(--accent-ink); background: var(--accent-soft);
-  border: 1px solid #c5d6f5; padding: 3px 9px; border-radius: 999px;
+  color: var(--accent-ink); background: var(--accent-wash);
+  border: 1px solid var(--border); padding: 3px 9px; border-radius: 999px;
   white-space: nowrap;
 }
 
@@ -260,8 +280,8 @@ h1 .en {
 }
 .wb-goal .goal-lab {
   font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft);
-  border: 1px solid #c5d6f5; padding: 2px 8px; border-radius: 6px; margin-right: 8px;
+  text-transform: uppercase; color: var(--accent-ink); background: var(--accent-wash);
+  border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; margin-right: 8px;
   white-space: nowrap; vertical-align: middle;
 }
 .ach-list { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
@@ -277,52 +297,54 @@ h1 .en {
   border-radius: 5px; white-space: nowrap;
 }
 .par-lab.p { color: #8a5a00; background: #fff4e0; border: 1px solid #f3dcae; }
-.par-lab.a { color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); }
+.par-lab.a { color: var(--muted); background: var(--surface); border: 1px solid var(--border); }
 .par-lab.r { color: #0f6b46; background: #e7f7ef; border: 1px solid #bce6d2; }
 .par-val { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; }
 .par-val.res { color: var(--accent-ink); font-weight: 650; }
 
 /* ---- compact past / in-progress project lists ---- */
-.proj-more { margin-top: 16px; }
+.proj-more { margin-top: var(--space-element); }
 .proj-more .lab {
-  font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--muted);
+  /* "이전 프로젝트"·"진행 중" — 한글 라벨 B */
+  font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--muted);
 }
 .proj-more .mini { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .proj-more .mini li { position: relative; padding-left: 16px; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
 .proj-more .mini li::before {
   content: ""; position: absolute; left: 0; top: 8px;
-  width: 5px; height: 5px; border-radius: 1px; background: var(--faint); transform: rotate(45deg);
+  width: 5px; height: 5px; border-radius: 1px; background: var(--muted); transform: rotate(45deg);
 }
 .proj-more .mini li b { color: var(--ink-soft); font-weight: 700; }
 
 /* ---- projects ---- */
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-block); }
 .card { border: 1px solid var(--border); border-radius: var(--r); padding: 20px; background: #fff; display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s, transform .15s; }
-.card:hover { border-color: #c5d6f5; box-shadow: 0 8px 28px -18px rgba(29,78,216,.45); transform: translateY(-2px); }
-.card.feat { grid-column: 1 / -1; background: linear-gradient(180deg, var(--surface) 0%, #fff 60%); border-color: #d4e2ff; }
+.card:hover { border-color: var(--border); box-shadow: 0 8px 28px -18px rgba(29,78,216,.45); transform: translateY(-2px); }
+.card.feat { grid-column: 1 / -1; background: linear-gradient(180deg, var(--surface) 0%, #fff 60%); border-color: var(--border); }
 .card h3 { margin: 0; font-size: 16.5px; font-weight: 750; }
-.card .repo { font-family: var(--mono); font-size: 11.5px; color: var(--faint); margin-top: 3px; }
+.card .repo { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 .card p { margin: 11px 0 14px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; flex: 1; }
 .stack { display: flex; flex-wrap: wrap; gap: 6px; }
-.stack span { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--accent-soft); padding: 3px 8px; border-radius: 6px; }
+.stack span { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--accent-wash); padding: 3px 8px; border-radius: 6px; }
 
-.dev { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.dev .lab { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em; }
+.dev { margin-top: var(--space-element); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.dev .lab { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
 .dev .pill { font-size: 13px; color: var(--ink-soft); border: 1px dashed var(--border); border-radius: 7px; padding: 4px 11px; background: var(--surface); }
-.dev .pill .repo { font-family: var(--mono); font-size: 10.5px; color: var(--faint); margin-left: 6px; }
+.dev .pill .repo { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-left: 6px; }
 
 /* ---- essay / cover letter ---- */
-.essay { display: flex; flex-direction: column; gap: 24px; max-width: 70ch; }
+.essay { display: flex; flex-direction: column; gap: var(--space-block); max-width: 620px; }
 .essay .blk .h { font-weight: 750; font-size: 16.5px; color: var(--ink); margin: 0 0 7px; display: flex; align-items: center; gap: 9px; }
 .essay .blk .h::before { content: ""; width: 16px; height: 2px; background: var(--accent); border-radius: 2px; flex: none; }
 .essay .blk p { margin: 0; font-size: 15px; color: var(--ink-soft); line-height: 1.78; }
 .essay .blk p b { color: var(--ink); font-weight: 700; }
 
 footer {
-  margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
-  color: var(--faint); font-family: var(--mono); font-size: 12px;
+  margin-top: var(--space-section); padding-top: var(--space-block); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-element);
+  /* 이름·직함(한글)이 섞여 mono 대신 --sans */
+  color: var(--muted); font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -336,15 +358,39 @@ footer {
 }
 
 /* ---- print / A4 ---- */
-@page { size: A4; margin: 14mm 14mm 16mm; }
+@page {
+  size: A4; margin: 22mm 18mm;
+  /* 페이지 번호 자동 카운터 — 페이지를 빼도 재계산됨 */
+  @bottom-right { content: counter(page) " / " counter(pages); font-family: var(--mono); font-size: 8pt; color: var(--muted); }
+}
 @media print {
-  body { background: #fff; font-size: 10.5pt; line-height: 1.5; }
+  /* 인쇄 사양 정본: 본문 10.5pt/1.6 · 항목 10pt/1.65 · H1 24pt · H2 18pt ·
+     라벨 9pt · 푸터 8pt. */
+  body { background: #fff; font-size: 10.5pt; line-height: 1.6; }
   .wrap { max-width: 100%; padding: 0; }
   header.hero { padding: 0 0 6px; }
   h1 { font-size: 24pt; }
+  h2.sec { font-size: 18pt; }
   section { margin-top: 18px; }
-  .contacts a { border: 0; padding: 0 10px 0 0; }
+  .job li, .comp-list li, .cg-points li, .wb li, .ach-name, .par-val { font-size: 10pt; line-height: 1.65; }
+  .pinfo .lab, .skrow .cat, .proj-more .lab, .role-tag, .par-lab, .flag, .wb-goal .goal-lab {
+    font-size: 9pt;
+  }
+  footer { font-size: 8pt; }
+  /* 흑백 인쇄 대비 — 배지는 채움 없이 테두리로만 */
+  .flag { background: transparent; border: 1px solid currentColor; }
+  .flag.done { background: transparent; }
+  /* 이메일·URL 등 공백 없는 긴 문자열이 좁은 칸에서 글자 단위로 쪼개지는 회귀 방지 —
+     flex item이 min-content로 강제 축소되지 않게 자연 폭을 확보한다.
+     overflow-wrap: anywhere는 실제로 폭을 넘칠 때만 발동(정상 폭에서는 무해). */
+  /* overflow-wrap: anywhere는 min/max-content 계산 자체를 "아무 데서나 끊길 수 있음"으로
+     바꿔 min-width: max-content가 무력화된다(이메일이 여전히 글자 단위로 쪼개짐,
+     실렌더 확정) — 인쇄 폭은 충분하므로 print에서는 normal로 되돌려 정상 폭을 확보한다. */
+  .contacts a { border: 0; padding: 0 10px 0 0; flex: none; min-width: max-content; overflow-wrap: normal; }
   .card:hover, .contacts a:hover, .card { box-shadow: none !important; transform: none !important; }
+  /* 회사 헤더(h3·meta) 직후 페이지가 끊기면 헤더만 남고 첫 과제 블록이 다음 페이지로
+     밀려 여백이 생긴다 — 헤더 바로 뒤 페이지 분할을 금지해 헤더째 다음 페이지로 넘긴다. */
+  .job h3, .job .meta { break-after: avoid; page-break-after: avoid; }
   /* WeasyPrint paged 컨텍스트 안정화: 세로 스택 flex를 블록 흐름으로 전환한다.
      WeasyPrint는 flex-direction:column의 페이지 넘김·flex-grow 높이 계산이 약해
      페이지 경계에서 자식이 겹쳐 찍힌다. gap은 인접 여백으로 대체한다. */
@@ -378,12 +424,13 @@ footer {
     <nav class="contacts">
       <a href="mailto:novatecoder@gmail.com" class="copy-email" data-email="novatecoder@gmail.com" title="클릭하면 메일 주소가 복사됩니다"><span class="k">✉</span> novatecoder@gmail.com<span class="copy-tip" aria-live="polite" style="margin-left:6px;color:var(--accent-ink);font-weight:600;"></span></a>
       <a href="https://github.com/novatecoder"><span class="k">↗</span> github.com/novatecoder</a>
-      <a href="https://novatecoder.github.io/portfolio/"><span class="k">↗</span> 웹 포트폴리오</a>
-      <a href="https://app.notion.com/p/2026-3a37b808814a8050a490c1572bab648c"><span class="k">↗</span> 노션 포트폴리오</a>
+      
+      <a href="https://novatecoder.github.io/portfolio/"><span class="k">↗</span> <span>웹 포트폴리오</span></a>
+      <a href="https://app.notion.com/p/2026-3a37b808814a8050a490c1572bab648c"><span class="k">↗</span> <span>노션 포트폴리오</span></a>
     </nav>
   </header>
   <section>
-    <h2 class="sec">학력</h2>
+    <h2 class="sec"><span>학력</span></h2>
     <div class="edu">
       <div class="row">
         <div class="d">
@@ -404,7 +451,7 @@ footer {
     </div>
   </section>
   <section>
-    <h2 class="sec">핵심 역량</h2>
+    <h2 class="sec"><span>핵심 역량</span></h2>
     <div class="comp-groups">
       <div class="cg">
         <div class="cg-title">도메인 특화 LLM 고효율 학습·최적화 역량</div>
@@ -434,7 +481,7 @@ footer {
     </div>
   </section>
   <section>
-    <h2 class="sec">기술 스택</h2>
+    <h2 class="sec"><span>기술 스택</span></h2>
     <div class="skills">
       <div class="skrow">
         <div class="cat">LLM 앱·에이전트</div>
@@ -512,7 +559,7 @@ footer {
     </div>
   </section>
   <section>
-    <h2 class="sec">경력</h2>
+    <h2 class="sec"><span>경력</span></h2>
     <div class="tl">
       <div class="job">
         <div class="when">2018.07–2025.08 (7년 2개월)</div>
@@ -730,7 +777,7 @@ footer {
     </div>
   </section>
   <section>
-    <h2 class="sec">대표 프로젝트</h2>
+    <h2 class="sec"><span>대표 프로젝트</span></h2>
     <div class="grid">
       <div class="card">
         <h3>
@@ -821,26 +868,26 @@ footer {
     </div>
   </section>
   <section>
-    <h2 class="sec">자기소개서</h2>
+    <h2 class="sec"><span>자기소개서</span></h2>
     <div class="essay">
       <div class="blk">
-        <div class="h">지향점 및 포부 — 아이디어를 &#39;동작하는 서비스&#39;로 구현하는 실전형 AI 엔지니어</div>
+        <div class="h"><span>지향점 및 포부 — 아이디어를 &#39;동작하는 서비스&#39;로 구현하는 실전형 AI 엔지니어</span></div>
         <p>AI로 실생활과 산업 현장의 불편을 해소하는 데 흥미를 느껴 이 길을 걸어왔습니다. 지난 7년간 보안이라는 특수 도메인에서 &#39;이론&#39;을 &#39;현장의 가치&#39;로 전환하는 엔지니어링의 본질을 체감했고, 최근에는 생성형 AI·에이전트 기술을 실무에 적용하는 영역으로 역량을 넓혀왔습니다. 앞으로도 최신 AI 기술을 PoC로 빠르게 검증하고 확장형 시스템으로 안착시켜, 사용자가 체감할 수 있는 실질적 가치를 만드는 엔지니어가 되고자 합니다.</p>
       </div>
       <div class="blk">
-        <div class="h">직무 역량 — 모델 최적화부터 MLOps, 최신 에이전트까지 검증된 스택</div>
+        <div class="h"><span>직무 역량 — 모델 최적화부터 MLOps, 최신 에이전트까지 검증된 스택</span></div>
         <p>안랩 7년 2개월간 AI 엔지니어링 전 과정을 End-to-End로 수행했습니다. Spark 기반 TB급 빅데이터 처리(조회 성능 70% 개선·인프라 비용 30% 절감), 보안 도메인 LLM 파인튜닝·최적화(LoRA·DeepSpeed·Unsloth, 학습 속도 50% 개선), Airflow·Kubernetes 기반 MLOps 자동화까지 담당했습니다. 이직 후에는 LangGraph 멀티에이전트·RAG·MCP 기반 AI Agent를 직접 구현·검증하고, Claude Code 기반 개발 하네스를 설계해 개발 과정 자체를 자동화하며 다수 개인 프로젝트를 선구현하고 있습니다.</p>
       </div>
       <div class="blk">
-        <div class="h">성장 과정 — &#39;데이터를 더 넣을까&#39;에서 &#39;문제를 다시 정의할까&#39;로</div>
+        <div class="h"><span>성장 과정 — &#39;데이터를 더 넣을까&#39;에서 &#39;문제를 다시 정의할까&#39;로</span></div>
         <p>주니어 시절 보안 관제 모델의 오탐을 &#39;틀린 데이터 재학습&#39;으로만 대응했으나 해결되지 않았습니다. 수석 연구원의 &#39;이 파일이 왜 탐지되면 안 되는지 분석했냐&#39;는 질문을 계기로, 문제를 &#39;모델 성능 개선&#39;이 아닌 &#39;파일 분석 기반 예외 처리(화이트리스트)&#39;로 재정의해 해결했습니다. 이후 &#39;어떻게 구현하지&#39;보다 &#39;왜 해야 하고 근본 원인이 무엇인지&#39;를 먼저 묻는 공학적 사고를 체득했습니다.</p>
       </div>
       <div class="blk">
-        <div class="h">업무 방식 및 성격 — 궁즉변(窮則變)의 지혜와 PoC 기반의 기민함</div>
+        <div class="h"><span>업무 방식 및 성격 — 궁즉변(窮則變)의 지혜와 PoC 기반의 기민함</span></div>
         <p>&#39;궁즉변 변즉통 통즉구&#39;를 좌우명으로 삼아, 막힌 문제일수록 관점을 바꿔 돌파구를 찾습니다. 신중한 성향을 보완하기 위해 PoC 기반 단계별 일정 관리를 실천합니다 — 빠른 PoC로 타당성을 먼저 검증하고, 확장형으로 설계한 뒤, 기본 요구사항을 충족하고 신기능을 추가합니다. 흥미로운 기술은 TODO로 관리해 본류 작업의 리듬을 잃지 않습니다.</p>
       </div>
       <div class="blk">
-        <div class="h">문제 해결 능력 — 선례 없는 난제를 도메인 최적화로 돌파</div>
+        <div class="h"><span>문제 해결 능력 — 선례 없는 난제를 도메인 최적화로 돌파</span></div>
         <p>레퍼런스가 전무한 상황에서 보안 로그라는 특수 데이터에 NLP를 접목했습니다. CNN·RNN·LSTM을 밑바닥부터 실험해 BERT 입력 구조 커스터마이징이 최선임을 증명했고, Airflow로 학습 파이프라인을 자동화하며 고객사 저사양 환경을 위해 경량화·양자화로 상용화까지 이끌었습니다. 다만 PoC부터 무작정 시작해 요구사항 변경으로 재작업한 경험에서, &#39;무엇을 만들 것인가&#39;의 초기 설계가 구현력만큼 중요함을 배웠습니다.</p>
       </div>
     </div>
