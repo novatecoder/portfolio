@@ -840,94 +840,6 @@ footer {
         
       </article>
       
-      <article class="card feat">
-        <div class="top">
-          <h3>persona-agent</h3>
-          <a class="repo-link" href="https://github.com/novatecoder/persona-agent">링크 : persona-agent</a>
-        </div>
-        
-        <p class="lead">감정 엔진을 가진 캐릭터가 대화·기억·일정을 직접 관리하고 코딩 같은 태스크는 하위 에이전트에 맡기는, 인터넷 없이 도는 개인 AI 동반자입니다</p>
-        
-        
-        
-        <div class="par">
-          
-          <div class="par-row">
-            <span class="par-lab p">문제</span>
-            <span class="par-val">개인 AI 동반자는 대화와 기억이 클라우드로 나가면 프라이버시가 깨지고, 감정 표현을 매 턴 LLM에 맡기면 비결정적이고 비용도 큽니다</span>
-          </div>
-          
-          <div class="par-row">
-            <span class="par-lab a">접근</span>
-            <span class="par-val">캐릭터(페르소나)가 최상위에서 대화·감정·기억을 소유하는 LangGraph 오케스트레이터(router→감정 갱신→chat·retrieve·delegate·task·persona 분기)를 짜고, 감정은 LLM 밖 결정론적 엔진이 맡으며 대화는 로컬 vLLM, 코딩은 하위 에이전트(pi)에 위임해 런타임을 완전 오프라인으로 유지합니다</span>
-          </div>
-          
-          <div class="par-row">
-            <span class="par-lab r">결과</span>
-            <span class="par-val res">인터넷 없이 도는 개인 AI 동반자로, 기억이 로컬에 남아 다음 대화에서 참조되고 감정이 대화 톤에 배어나며 코딩 태스크까지 캐릭터 톤으로 위임·보고합니다 (개인용)</span>
-          </div>
-          
-        </div>
-        
-        
-        <div class="stack">
-          <span>LangGraph</span><span>vLLM</span><span>EXAONE</span><span>SQLite</span>
-        </div>
-        
-        
-        
-        
-        <details class="more demo-more">
-          
-          <summary><span>데모 및 상세 설명</span></summary>
-        
-          
-          <div class="par x">
-            
-            
-            <div class="par-row"><span class="par-lab a">배경</span><span class="par-val">개인적인 대화를 나눌 AI 동반자를 만들어 보고 싶었지만, 대화와 기억이 외부 서버로 나가는 것도 감정을 매번 LLM에 물어보느라 느리고 들쭉날쭉한 것도 마음에 걸렸습니다</span></div>
-            
-            
-            
-            <div class="par-row"><span class="par-lab a">가치</span><span class="par-val">모든 대화와 기억이 기기 안에만 남아 사생활이 지켜지고, 감정 상태가 결정론적으로 유지돼 같은 캐릭터가 일관된 성격으로 반응합니다</span></div>
-            
-            
-            
-            <div class="par-row"><span class="par-lab a">감정 엔진</span><span class="par-val">valence·arousal·dominance(VAD) 연속 상태를 축별 시간 감쇠(half-life)로 결정론적으로 유지하고, 매 턴 그 상태를 해석하는 부분(mood-congruent appraisal)만 LLM이 맡아 같은 말도 기분에 따라 다르게 받아들입니다</span></div>
-            
-            
-            
-            <div class="par-row"><span class="par-lab a">기억</span><span class="par-val">md 위키를 정본으로 두고 SQLite FTS5 + sqlite-vec에 BGE-M3 임베딩을 얹은 하이브리드 RAG로 검색하며(RRF 융합), 쓰기는 검증기를 거쳐 git 커밋으로 감사 추적됩니다</span></div>
-            
-            
-            
-            <div class="par-row"><span class="par-lab a">서빙</span><span class="par-val">로컬 vLLM에 EXAONE 3.5 7.8B AWQ 단일 모델을 올려 시스템 프롬프트로 역할만 바꿔 멀티롤로 씁니다</span></div>
-            
-            
-            
-            <div class="par-row"><span class="par-lab a">데모</span><span class="par-val">같은 8턴 시나리오를 브라우저(감정 게이지 시각화)와 터미널(감정 수치·로컬 md/git 노출) 두 형태로 녹화해, 이름을 지어주고 기분이 오르내리며 시드된 기억을 정확히 회상하고 피보나치 코드를 하위 에이전트에 위임하는 장면을 보여줍니다</span></div>
-            
-            
-          </div>
-          
-          
-          
-          <video class="demo-video" autoplay muted loop playsinline controls preload="none" poster="assets/persona-agent/shots/01_start.png">
-            <source src="assets/persona-agent/browser.mp4" type="video/mp4">
-          </video>
-          
-          
-          <div class="shots">
-            <img src="assets/persona-agent/shots/03_emotion_down.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/04_emotion_up.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/05_memory.png" alt="persona-agent 스크린샷" loading="lazy"><img src="assets/persona-agent/shots/06_delegate.png" alt="persona-agent 스크린샷" loading="lazy">
-          </div>
-          
-          
-        
-        </details>
-        
-        
-      </article>
-      
     </div>
   </section>
   
@@ -1035,6 +947,16 @@ footer {
   <section>
     <h2 class="sec"><span>진행 중 개인 프로젝트</span></h2>
     <div class="grid dev-grid">
+      
+      <article class="card dev-card">
+        <h3>개인 AI 동반자</h3>
+        <p class="lead">감정 엔진을 가진 캐릭터가 대화와 기억, 일정을 직접 관리하고 코딩 태스크는 하위 에이전트에 맡기는 오프라인 개인 AI 동반자로, 초기 버전을 만들어 개선을 진행하고 있습니다</p>
+        
+        <div class="stack">
+          <span>LangGraph</span><span>vLLM</span><span>EXAONE</span><span>SQLite</span>
+        </div>
+        
+      </article>
       
       <article class="card dev-card">
         <h3>특허 출원 자동화</h3>
